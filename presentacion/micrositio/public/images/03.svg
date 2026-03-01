@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="Marco del creyente">
+  <rect width="1600" height="900" fill="#10202a"/>
+  <rect x="120" y="120" width="1360" height="660" rx="40" fill="#f1e4c8" opacity="0.75"/>
+  <path d="M160 630 C360 420, 560 760, 760 560 C920 420, 1080 580, 1440 390" stroke="#1f5e7a" stroke-width="20" fill="none" opacity="0.55"/>
+  <circle cx="460" cy="390" r="160" fill="#b43c19" opacity="0.36"/>
+  <circle cx="1070" cy="520" r="220" fill="#314f3f" opacity="0.3"/>
+</svg>

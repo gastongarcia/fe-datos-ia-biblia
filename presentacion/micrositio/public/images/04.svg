@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="Estudio biblico">
+  <rect width="1600" height="900" fill="#1b2320"/>
+  <rect x="120" y="120" width="1360" height="660" rx="30" fill="#ebe2d0" opacity="0.88"/>
+  <path d="M260 620 L460 300 L620 560 L800 340 L980 610 L1200 330 L1360 610" stroke="#b43c19" stroke-width="18" fill="none" opacity="0.62"/>
+  <rect x="250" y="220" width="270" height="180" rx="16" fill="#1f5e7a" opacity="0.48"/>
+  <rect x="1080" y="470" width="270" height="180" rx="16" fill="#314f3f" opacity="0.48"/>
+</svg>
