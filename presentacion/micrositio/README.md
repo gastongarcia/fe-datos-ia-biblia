@@ -1,9 +1,6 @@
 # Micrositio Fe + Datos
 
-Micrositio narrativo con doble uso:
-
-- Presentación en monitor/proyector (modo `Escenario`)
-- Lectura pública desde URL en móvil/laptop (modo `Lectura`)
+Micrositio narrativo para presentación en monitor/proyector y lectura pública desde URL en móvil/laptop.
 
 ## Ejecutar
 
@@ -30,7 +27,7 @@ No necesitas copiar texto al micrositio. Edita esos markdowns y recarga.
 
 - Navegar capítulos: `ArrowRight`, `Space`, `J` (siguiente), `ArrowLeft`, `K` (anterior)
 - Índice lateral clickeable (desktop)
-- Switch de modo: `Escenario` / `Lectura`
+- Scroll libre en móvil/laptop para lectura continua
 
 ## Dónde ajustar diseño
 
