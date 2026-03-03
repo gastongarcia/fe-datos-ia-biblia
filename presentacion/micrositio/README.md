@@ -48,3 +48,5 @@ Reemplaza los placeholders en:
 - `public/images/05.svg`
 
 Puedes usar `.webp`/`.avif` y actualizar la ruta en `app/lib/content.ts`.
+
+Nota: el despliegue de producción debe tomar siempre el último commit de `main`.
