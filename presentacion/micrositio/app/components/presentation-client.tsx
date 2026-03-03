@@ -14,7 +14,7 @@ function MarkdownContent({
 }: {
   chapter: Chapter;
 }) {
-  const { markdown, image, title, prompt } = chapter;
+  const { markdown, image, title } = chapter;
   const blocks = useMemo(() => parseMarkdown(markdown), [markdown]);
   const imageInsertIndex = useMemo(() => {
     const firstH2 = blocks.findIndex((block) => block.type === 'h2');
@@ -93,10 +93,6 @@ function MarkdownContent({
               >
                 <Image src={image} alt={title} fill className="object-cover" />
               </div>
-              <details className="mt-3 rounded-2xl border border-ink/15 bg-white/80 p-3 text-sm text-ink/85">
-                <summary className="cursor-pointer font-semibold">Prompt de imagen LLM para este capítulo</summary>
-                <p className="mt-2 leading-relaxed">{prompt}</p>
-              </details>
             </div>
           </div>
         );

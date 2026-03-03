@@ -9,17 +9,12 @@ export type Chapter = {
   subtitle: string;
   markdown: string;
   image: string;
-  prompt: string;
 };
 
 const TITLE_RE = /^#\s+(.+)$/m;
 const H2_RE = /^##\s+(.+)$/m;
 
 const PRESENTACION_DIR = path.resolve(process.cwd(), '..');
-
-function derivePrompt(title: string): string {
-  return `Crea una imagen cinematográfica y realista para el tema "${title}" con estética editorial, alto contraste, luz cálida, composición limpia y sin texto.`;
-}
 
 function cleanMarkdown(raw: string): string {
   return raw
@@ -52,8 +47,7 @@ export function loadChapters(): Chapter[] {
       title,
       subtitle,
       markdown,
-      image: `/images/${String((index % 5) + 1).padStart(2, '0')}.svg`,
-      prompt: derivePrompt(title)
+      image: `/images/${String((index % 5) + 1).padStart(2, '0')}.svg`
     };
   });
 }
