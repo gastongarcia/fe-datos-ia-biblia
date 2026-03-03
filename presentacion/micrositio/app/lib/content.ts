@@ -47,7 +47,35 @@ export function loadChapters(): Chapter[] {
       title,
       subtitle,
       markdown,
-      image: `/images/${String((index % 5) + 1).padStart(2, '0')}.svg`
+      image: index === 0
+        ? '/images/large-woman-reading-bible.webp'
+        : index === 1
+          ? '/images/large-woman-library.webp'
+          : index === 2
+            ? '/images/large-woman-reading-tree.webp'
+            : index === 3
+              ? '/images/large-woman-friends.webp'
+              : index === 4
+                ? '/images/large-woman-confused.webp'
+                : index === 5
+                  ? '/images/large-woman-notes.webp'
+                  : index === 6
+                    ? '/images/large-woman-chapel.webp'
+                    : index === 7
+                      ? '/images/large-woman-friend.webp'
+                      : index === 8
+                        ? '/images/large-woman-jerusalem.webp'
+                        : index === 9
+                          ? '/images/large-woman-pharisee.webp'
+                          : index === 10
+                            ? '/images/large-woman-meal.webp'
+                            : index === 11
+                              ? '/images/large-woman-luther.webp'
+                              : index === 12
+                                ? '/images/large-woman-vineyard.webp'
+                                : index === 13
+                                  ? '/images/large-woman-thankyou.webp'
+          : `/images/${String((index % 5) + 1).padStart(2, '0')}.svg`
     };
   });
 }
