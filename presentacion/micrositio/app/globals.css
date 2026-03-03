@@ -170,6 +170,11 @@ body::before {
   color: var(--ink-muted);
 }
 
+.chapter-nav-item svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
 .chapter-article {
   border: 1px solid var(--line-soft);
   background: var(--surface-card);
@@ -298,6 +303,40 @@ body::before {
 
 .md-media-wrap {
   margin: 1.2rem 0 1.6rem;
+}
+
+.prompt-callout {
+  margin: 1rem 0 1.2rem;
+  border: 1px solid color-mix(in srgb, var(--accent-2) 50%, var(--line-soft));
+  border-radius: 0.8rem;
+  background: color-mix(in srgb, var(--surface-card-soft) 82%, var(--accent-2));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.26);
+  padding: 0.8rem 0.95rem 0.7rem;
+}
+
+.prompt-callout > .md-h2,
+.prompt-callout > .md-h3 {
+  margin-top: 0.2rem;
+}
+
+.prompt-callout-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.6rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 80%, transparent);
+  color: #fff;
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 0.25rem 0.58rem;
+}
+
+.prompt-callout-label svg {
+  width: 0.9rem;
+  height: 0.9rem;
 }
 
 @media (max-width: 1023px) {

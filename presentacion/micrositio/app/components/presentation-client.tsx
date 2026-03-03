@@ -12,6 +12,22 @@ type Props = {
 type Theme = 'light' | 'dark';
 
 const THEME_KEY = 'fe-y-datos-theme';
+const PRACTICAL_LABEL = 'Práctica con prompt';
+
+function isPracticalBlock(block: ReturnType<typeof parseMarkdown>[number]): boolean {
+  // Apply the prompt badge only to real prompt blocks (markdown blockquotes),
+  // not to section titles or explanatory text that mention "ejercicio/prompt".
+  return block.type === 'blockquote';
+}
+
+function WandIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 20 19.6 4.4a1.4 1.4 0 0 1 2 2L6 22H4v-2Z" />
+      <path d="M13 3V1M16 4l1.5-1.5M18 7h2M16 10l1.5 1.5M13 11v2" />
+    </svg>
+  );
+}
 
 function MarkdownContent({
   chapter
@@ -32,6 +48,7 @@ function MarkdownContent({
     <div className="md-content">
       {blocks.map((block, index) => {
         const key = `${block.type}-${index}`;
+        const practical = isPracticalBlock(block);
         let rendered: React.ReactNode;
 
         if (block.type === 'h1') {
@@ -84,6 +101,18 @@ function MarkdownContent({
           rendered = <hr key={key} className="md-hr" />;
         }
 
+        if (practical) {
+          rendered = (
+            <div key={`${key}-practical`} className="prompt-callout" data-practical="true">
+              <div className="prompt-callout-label">
+                <WandIcon />
+                <span>{PRACTICAL_LABEL}</span>
+              </div>
+              {rendered}
+            </div>
+          );
+        }
+
         if (index !== imageInsertIndex) {
           return rendered;
         }
@@ -110,6 +139,32 @@ export default function PresentationClient({ chapters }: Props) {
   const [theme, setTheme] = useState<Theme>('light');
   const [themeReady, setThemeReady] = useState(false);
   const refs = useRef<Array<HTMLElement | null>>([]);
+
+  const jumpToPractical = (direction: 1 | -1) => {
+    const markers = Array.from(document.querySelectorAll<HTMLElement>('[data-practical="true"]'));
+    if (!markers.length) {
+      return;
+    }
+
+    const probe = window.scrollY + window.innerHeight * 0.24;
+    const tops = markers.map((marker) => marker.getBoundingClientRect().top + window.scrollY);
+    let targetIndex = 0;
+
+    if (direction > 0) {
+      const found = tops.findIndex((top) => top > probe + 4);
+      targetIndex = found >= 0 ? found : 0;
+    } else {
+      targetIndex = tops.length - 1;
+      for (let index = tops.length - 1; index >= 0; index -= 1) {
+        if (tops[index] < probe - 4) {
+          targetIndex = index;
+          break;
+        }
+      }
+    }
+
+    markers[targetIndex]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   useEffect(() => {
     const storedTheme = window.localStorage.getItem(THEME_KEY);
@@ -178,7 +233,9 @@ export default function PresentationClient({ chapters }: Props) {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (!['ArrowRight', 'ArrowLeft', ' ', 'j', 'k', 'J', 'K'].includes(event.key)) {
+      const isNavKey = ['ArrowRight', 'ArrowLeft', ' ', 'j', 'k', 'J', 'K'].includes(event.key);
+      const isPracticalJump = event.key.toLowerCase() === 'p';
+      if (!isNavKey && !isPracticalJump) {
         return;
       }
 
@@ -187,6 +244,12 @@ export default function PresentationClient({ chapters }: Props) {
       }
 
       event.preventDefault();
+
+      if (isPracticalJump) {
+        jumpToPractical(event.shiftKey ? -1 : 1);
+        return;
+      }
+
       const dir = ['ArrowRight', ' ', 'j', 'J'].includes(event.key) ? 1 : -1;
       const next = Math.max(0, Math.min(chapters.length - 1, active + dir));
       refs.current[next]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -225,6 +288,17 @@ export default function PresentationClient({ chapters }: Props) {
       >
         <p className="sidebar-kicker text-xs font-semibold uppercase tracking-[0.18em]">Fe + Datos</p>
         <p className="sidebar-progress mt-2 text-sm">Capítulo {progress}</p>
+        <button
+          type="button"
+          onClick={() => jumpToPractical(1)}
+          className="chapter-nav-item mt-3 w-full rounded-xl border px-3 py-2 text-left text-sm transition"
+        >
+          <span className="inline-flex items-center gap-2 font-semibold">
+            <WandIcon />
+            Ir al próximo práctico
+          </span>
+          <span className="mt-1 block text-xs opacity-80">Atajo: P (Shift+P anterior)</span>
+        </button>
         <nav className="mt-4 flex-1 space-y-2 overflow-auto pr-1">
           {chapters.map((chapter, index) => (
             <button
