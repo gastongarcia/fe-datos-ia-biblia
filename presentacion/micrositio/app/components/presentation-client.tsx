@@ -9,6 +9,10 @@ type Props = {
   chapters: Chapter[];
 };
 
+type Theme = 'light' | 'dark';
+
+const THEME_KEY = 'fe-y-datos-theme';
+
 function MarkdownContent({
   chapter
 }: {
@@ -89,7 +93,7 @@ function MarkdownContent({
             {rendered}
             <div className="md-media-wrap">
               <div
-                className="relative h-[240px] overflow-hidden rounded-2xl border border-ink/15 md:h-[320px] lg:h-[400px]"
+                className="chapter-media-frame relative h-[240px] overflow-hidden rounded-2xl md:h-[320px] lg:h-[400px]"
               >
                 <Image src={image} alt={title} fill className="object-cover" />
               </div>
@@ -103,7 +107,27 @@ function MarkdownContent({
 
 export default function PresentationClient({ chapters }: Props) {
   const [active, setActive] = useState(0);
+  const [theme, setTheme] = useState<Theme>('light');
+  const [themeReady, setThemeReady] = useState(false);
   const refs = useRef<Array<HTMLElement | null>>([]);
+
+  useEffect(() => {
+    const storedTheme = window.localStorage.getItem(THEME_KEY);
+    const preferredDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initialTheme: Theme =
+      storedTheme === 'dark' || storedTheme === 'light' ? storedTheme : preferredDark ? 'dark' : 'light';
+
+    document.documentElement.setAttribute('data-theme', initialTheme);
+    setTheme(initialTheme);
+    setThemeReady(true);
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme: Theme = theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', nextTheme);
+    window.localStorage.setItem(THEME_KEY, nextTheme);
+    setTheme(nextTheme);
+  };
 
   useEffect(() => {
     let rafId = 0;
@@ -176,12 +200,31 @@ export default function PresentationClient({ chapters }: Props) {
 
   return (
     <main className="relative z-10 mx-auto flex w-full max-w-[1960px] gap-6 px-3 py-5 lg:px-8">
+      <button
+        type="button"
+        onClick={toggleTheme}
+        className="theme-toggle"
+        aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'}
+      >
+        <span className="theme-toggle-icons" aria-hidden>
+          <span className={`theme-icon ${themeReady && theme === 'light' ? 'is-active' : ''}`}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2.5v2.2M12 19.3v2.2M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6" />
+            </svg>
+          </span>
+          <span className={`theme-icon ${themeReady && theme === 'dark' ? 'is-active' : ''}`}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20.2 14.4A8.5 8.5 0 1 1 9.6 3.8a7 7 0 0 0 10.6 10.6z" />
+            </svg>
+          </span>
+        </span>
+      </button>
       <aside
         className="glass-panel sticky top-4 hidden h-[calc(100vh-2rem)] w-[300px] shrink-0 rounded-2xl p-4 shadow-soft xl:flex xl:flex-col"
       >
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink/70">Fe + Datos</p>
-        <h1 className="title-display mt-2 text-3xl leading-[1.02] text-ink">Presentación viva</h1>
-        <p className="mt-2 text-sm text-ink/75">Capítulo {progress}</p>
+        <p className="sidebar-kicker text-xs font-semibold uppercase tracking-[0.18em]">Fe + Datos</p>
+        <p className="sidebar-progress mt-2 text-sm">Capítulo {progress}</p>
         <nav className="mt-4 flex-1 space-y-2 overflow-auto pr-1">
           {chapters.map((chapter, index) => (
             <button
@@ -191,7 +234,7 @@ export default function PresentationClient({ chapters }: Props) {
               className={`w-full rounded-xl border px-3 py-2 text-left transition ${
                 index === active
                   ? 'border-ember bg-ember text-white'
-                  : 'border-ink/15 bg-white/50 text-ink hover:border-ink/35'
+                  : 'chapter-nav-item'
               }`}
             >
               <p className="truncate text-[11px] uppercase tracking-[0.14em]">{chapter.filename.replace('.md', '')}</p>
@@ -199,7 +242,7 @@ export default function PresentationClient({ chapters }: Props) {
             </button>
           ))}
         </nav>
-        <div className="mt-3 rounded-xl bg-white/75 p-3 text-xs text-ink/80">
+        <div className="chapter-help mt-3 rounded-xl p-3 text-xs">
           Navegación: <strong>← →</strong>, <strong>J/K</strong>, <strong>Space</strong>
         </div>
       </aside>
@@ -212,7 +255,7 @@ export default function PresentationClient({ chapters }: Props) {
             ref={(node) => {
               refs.current[index] = node;
             }}
-            className="reveal min-h-[70vh] scroll-mt-24 overflow-hidden rounded-3xl border border-ink/10 bg-[rgba(255,255,255,0.72)] shadow-soft"
+            className="chapter-article reveal min-h-[70vh] scroll-mt-24 overflow-hidden rounded-3xl shadow-soft"
           >
             <div className="p-5 lg:p-8">
               <MarkdownContent chapter={chapter} />
