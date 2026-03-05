@@ -9,9 +9,6 @@ type Props = {
   chapters: Chapter[];
 };
 
-type Theme = 'light' | 'dark';
-
-const THEME_KEY = 'fe-y-datos-theme';
 const PRACTICAL_LABEL = 'Práctica con prompt';
 
 function isPracticalBlock(block: ReturnType<typeof parseMarkdown>[number]): boolean {
@@ -136,8 +133,6 @@ function MarkdownContent({
 
 export default function PresentationClient({ chapters }: Props) {
   const [active, setActive] = useState(0);
-  const [theme, setTheme] = useState<Theme>('light');
-  const [themeReady, setThemeReady] = useState(false);
   const refs = useRef<Array<HTMLElement | null>>([]);
 
   const jumpToPractical = (direction: 1 | -1) => {
@@ -164,24 +159,6 @@ export default function PresentationClient({ chapters }: Props) {
     }
 
     markers[targetIndex]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  useEffect(() => {
-    const storedTheme = window.localStorage.getItem(THEME_KEY);
-    const preferredDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initialTheme: Theme =
-      storedTheme === 'dark' || storedTheme === 'light' ? storedTheme : preferredDark ? 'dark' : 'light';
-
-    document.documentElement.setAttribute('data-theme', initialTheme);
-    setTheme(initialTheme);
-    setThemeReady(true);
-  }, []);
-
-  const toggleTheme = () => {
-    const nextTheme: Theme = theme === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', nextTheme);
-    window.localStorage.setItem(THEME_KEY, nextTheme);
-    setTheme(nextTheme);
   };
 
   useEffect(() => {
@@ -268,26 +245,6 @@ export default function PresentationClient({ chapters }: Props) {
 
   return (
     <main className="relative z-10 mx-auto flex w-full max-w-[1960px] gap-6 px-3 py-5 lg:px-8">
-      <button
-        type="button"
-        onClick={toggleTheme}
-        className="theme-toggle"
-        aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'}
-      >
-        <span className="theme-toggle-icons" aria-hidden>
-          <span className={`theme-icon ${themeReady && theme === 'light' ? 'is-active' : ''}`}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="4" />
-              <path d="M12 2.5v2.2M12 19.3v2.2M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6" />
-            </svg>
-          </span>
-          <span className={`theme-icon ${themeReady && theme === 'dark' ? 'is-active' : ''}`}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20.2 14.4A8.5 8.5 0 1 1 9.6 3.8a7 7 0 0 0 10.6 10.6z" />
-            </svg>
-          </span>
-        </span>
-      </button>
       <aside
         className="glass-panel sticky top-4 hidden h-[calc(100vh-2rem)] w-[300px] shrink-0 rounded-2xl p-4 shadow-soft xl:flex xl:flex-col"
       >
@@ -326,7 +283,7 @@ export default function PresentationClient({ chapters }: Props) {
         </div>
       </aside>
 
-      <section className="w-full space-y-4 pb-24 xl:pb-0">
+      <section className="min-w-0 flex-1 space-y-4 pb-24">
         {chapters.map((chapter, index) => (
           <article
             id={chapter.id}
@@ -334,7 +291,7 @@ export default function PresentationClient({ chapters }: Props) {
             ref={(node) => {
               refs.current[index] = node;
             }}
-            className="chapter-article reveal min-h-[70vh] scroll-mt-24 overflow-hidden rounded-3xl shadow-soft"
+            className="chapter-article reveal min-h-[70vh] w-full scroll-mt-24 overflow-hidden rounded-3xl shadow-soft"
           >
             <div className="p-5 lg:p-8">
               <MarkdownContent chapter={chapter} />
@@ -342,7 +299,7 @@ export default function PresentationClient({ chapters }: Props) {
           </article>
         ))}
       </section>
-      <nav className="mobile-chapter-nav xl:hidden" aria-label="Navegación de capítulos móvil">
+      <nav className="mobile-chapter-nav" aria-label="Navegación de capítulos móvil">
         <button
           type="button"
           onClick={() => scrollToChapter(active - 1)}
