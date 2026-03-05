@@ -260,6 +260,11 @@ export default function PresentationClient({ chapters }: Props) {
   }, [active, chapters.length]);
 
   const progress = `${active + 1}/${chapters.length}`;
+  const scrollToChapter = (index: number) => {
+    refs.current[index]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  const canGoPrev = active > 0;
+  const canGoNext = active < chapters.length - 1;
 
   return (
     <main className="relative z-10 mx-auto flex w-full max-w-[1960px] gap-6 px-3 py-5 lg:px-8">
@@ -304,7 +309,7 @@ export default function PresentationClient({ chapters }: Props) {
             <button
               key={chapter.id}
               type="button"
-              onClick={() => refs.current[index]?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              onClick={() => scrollToChapter(index)}
               className={`w-full rounded-xl border px-3 py-2 text-left transition ${
                 index === active
                   ? 'border-ember bg-ember text-white'
@@ -321,7 +326,7 @@ export default function PresentationClient({ chapters }: Props) {
         </div>
       </aside>
 
-      <section className="w-full space-y-4">
+      <section className="w-full space-y-4 pb-24 xl:pb-0">
         {chapters.map((chapter, index) => (
           <article
             id={chapter.id}
@@ -337,6 +342,39 @@ export default function PresentationClient({ chapters }: Props) {
           </article>
         ))}
       </section>
+      <nav className="mobile-chapter-nav xl:hidden" aria-label="Navegación de capítulos móvil">
+        <button
+          type="button"
+          onClick={() => scrollToChapter(active - 1)}
+          disabled={!canGoPrev}
+          className="mobile-nav-button"
+        >
+          Anterior
+        </button>
+        <label className="mobile-nav-select-wrap" htmlFor="mobile-chapter-select">
+          <span className="sr-only">Seleccionar capítulo</span>
+          <select
+            id="mobile-chapter-select"
+            value={active}
+            onChange={(event) => scrollToChapter(Number(event.target.value))}
+            className="mobile-nav-select"
+          >
+            {chapters.map((chapter, index) => (
+              <option key={chapter.id} value={index}>
+                {index + 1}. {chapter.title}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button
+          type="button"
+          onClick={() => scrollToChapter(active + 1)}
+          disabled={!canGoNext}
+          className="mobile-nav-button"
+        >
+          Siguiente
+        </button>
+      </nav>
     </main>
   );
 }
