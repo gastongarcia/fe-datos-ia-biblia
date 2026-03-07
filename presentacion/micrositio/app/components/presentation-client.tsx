@@ -133,6 +133,7 @@ function MarkdownContent({
 
 export default function PresentationClient({ chapters }: Props) {
   const [active, setActive] = useState(0);
+  const [sidebarHidden, setSidebarHidden] = useState(false);
   const refs = useRef<Array<HTMLElement | null>>([]);
 
   const jumpToPractical = (direction: 1 | -1) => {
@@ -212,11 +213,23 @@ export default function PresentationClient({ chapters }: Props) {
     const onKey = (event: KeyboardEvent) => {
       const isNavKey = ['ArrowRight', 'ArrowLeft', ' ', 'j', 'k', 'J', 'K'].includes(event.key);
       const isPracticalJump = event.key.toLowerCase() === 'p';
-      if (!isNavKey && !isPracticalJump) {
+      const isSidebarToggle = event.key.toLowerCase() === 'n';
+      if (!isNavKey && !isPracticalJump && !isSidebarToggle) {
         return;
       }
 
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      if (isSidebarToggle) {
+        const isDesktop = window.matchMedia('(min-width: 1280px)').matches;
+        if (!isDesktop) {
+          return;
+        }
+
+        event.preventDefault();
+        setSidebarHidden((prev) => !prev);
         return;
       }
 
@@ -246,7 +259,9 @@ export default function PresentationClient({ chapters }: Props) {
   return (
     <main className="relative z-10 mx-auto flex w-full max-w-[1960px] gap-6 px-3 py-5 lg:px-8">
       <aside
-        className="glass-panel sticky top-4 hidden h-[calc(100vh-2rem)] w-[300px] shrink-0 rounded-2xl p-4 shadow-soft xl:flex xl:flex-col"
+        className={`glass-panel sticky top-4 hidden h-[calc(100vh-2rem)] w-[300px] shrink-0 rounded-2xl p-4 shadow-soft ${
+          sidebarHidden ? 'xl:hidden' : 'xl:flex xl:flex-col'
+        }`}
       >
         <p className="sidebar-kicker text-xs font-semibold uppercase tracking-[0.18em]">Fe + Datos</p>
         <p className="sidebar-progress mt-2 text-sm">Capítulo {progress}</p>
@@ -279,9 +294,18 @@ export default function PresentationClient({ chapters }: Props) {
           ))}
         </nav>
         <div className="chapter-help mt-3 rounded-xl p-3 text-xs">
-          Navegación: <strong>← →</strong>, <strong>J/K</strong>, <strong>Space</strong>
+          Navegación: <strong>← →</strong>, <strong>J/K</strong>, <strong>Space</strong>, <strong>N</strong> menú
         </div>
       </aside>
+      {sidebarHidden && (
+        <button
+          type="button"
+          onClick={() => setSidebarHidden(false)}
+          className="fixed left-4 top-4 z-[70] hidden rounded-xl border border-[var(--line-soft)] bg-[var(--surface-panel)] px-3 py-2 text-sm font-semibold text-[var(--ink)] shadow-soft xl:inline-flex"
+        >
+          Mostrar navegación (N)
+        </button>
+      )}
 
       <section className="min-w-0 flex-1 space-y-4 pb-24">
         {chapters.map((chapter, index) => (

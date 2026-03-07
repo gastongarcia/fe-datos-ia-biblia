@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fe + Datos: Biblioteca de Prompts</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --surface-color: #1e293b;
+            --surface-hover: #334155;
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --accent-color: #10b981;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        header {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
+            border-bottom: 1px solid var(--border-color);
+            padding: 3rem 1.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100vw;
+            height: 100vw;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, rgba(15, 23, 42, 0) 70%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, #60a5fa, #34d399);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.05em;
+        }
+
+        .subtitle {
+            font-size: 1.125rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .category-filter {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            justify-content: center;
+            position: sticky;
+            top: 1rem;
+            z-index: 10;
+        }
+
+        .filter-btn {
+            background: var(--surface-color);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .category-section {
+            margin-bottom: 3rem;
+        }
+
+        .category-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .prompt-card {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prompt-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+            border-color: #475569;
+        }
+
+        .prompt-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary-color);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .prompt-card:hover::after {
+            opacity: 1;
+        }
+
+        .prompt-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #e2e8f0;
+        }
+
+        .prompt-desc {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 1.25rem;
+        }
+
+        .prompt-content {
+            background-color: #0f172a;
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            white-space: pre-wrap;
+            margin-bottom: 1.25rem;
+            border: 1px solid #1e293b;
+            line-height: 1.5;
+        }
+
+        .copy-btn {
+            background: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .copy-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .copy-btn.success {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .copy-icon {
+            width: 18px;
+            height: 18px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: var(--accent-color);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 999px;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* Tools section */
+        .tools-section {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .tool-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: var(--text-main);
+            background: var(--surface-color);
+            padding: 1rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            width: 140px;
+            transition: var(--transition);
+        }
+
+        .tool-link:hover {
+            border-color: var(--text-muted);
+            transform: translateY(-2px);
+        }
+
+        .tool-link img {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+        }
+
+        .tool-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            main {
+                padding: 1.5rem 1rem;
+            }
+
+            .prompt-card {
+                padding: 1.25rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="header-content">
+            <h1>Fe + Datos</h1>
+            <p class="subtitle">Biblioteca de Prompts para el estudio guiado con Inteligencia Artificial</p>
+
+            <div class="tools-section">
+                <a href="https://chatgpt.com" target="_blank" class="tool-link">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg" alt="ChatGPT">
+                    <span class="tool-name">Abrir ChatGPT</span>
+                </a>
+                <a href="https://claude.ai" target="_blank" class="tool-link">
+                    <!-- Placeholder generic icon for Claude -->
+                    <div
+                        style="width:48px;height:48px;background:#d97757;border-radius:12px;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:24px;">
+                        C</div>
+                    <span class="tool-name">Abrir Claude</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="category-filter">
+            <button class="filter-btn active" data-filter="all">Todos</button>
+            <button class="filter-btn" data-filter="fundamentos">Fundamentos</button>
+            <button class="filter-btn" data-filter="contexto">Contexto Histórico</button>
+            <button class="filter-btn" data-filter="perspectivas">Perspectivas</button>
+            <button class="filter-btn" data-filter="libros">Estudio de Libros</button>
+            <button class="filter-btn" data-filter="historia">Historia y Viña</button>
+            <button class="filter-btn" data-filter="experimentos">Laboratorio (Alucinaciones)</button>
+        </div>
+
+        <div id="prompts-container">
+            <!-- Content will be injected by JavaScript -->
+        </div>
+
+    </main>
+
+    <div class="toast" id="toast">¡Prompt copiado al portapapeles!</div>
+
+    <script>
+        const promptsData = [
+            // FUNDAMENTOS
+            {
+                id: 'fundamento-0',
+                category: 'fundamentos',
+                title: 'Prompt Vago (El error común)',
+                desc: 'Lo que casi todo el mundo pregunta al principio. Úsalo para ver la diferencia en la calidad de la respuesta.',
+                content: `Háblame de los Corintios.`
+            },
+            {
+                id: 'fundamento-1',
+                category: 'fundamentos',
+                title: 'Prompt Detallado (Específico)',
+                desc: 'Un prompt con contexto, rol y límites para obtener una respuesta académica y profunda.',
+                content: `Soy un cristiano evangélico que está estudiando 1 Corintios. Me interesa entender los problemas específicos que Pablo estaba enfrentando en la iglesia de Corinto. ¿Cuáles eran los conflictos principales? Explícame el contexto social y cultural de Corinto que contribuía a estos problemas. Sé riguroso y basa tu respuesta en lo que los académicos bíblicos han documentado.`
+            },
+            {
+                id: 'fundamento-2',
+                category: 'fundamentos',
+                title: 'El Prompt Modelo (Plantilla Universal)',
+                desc: 'Una plantilla base que puedes usar para estudiar cualquier libro o pasaje.',
+                content: `Soy un cristiano evangélico de Costa Rica. Estoy estudiando [LIBRO / PASAJE] y necesito tu ayuda.
+
+Quiero que me expliques:
+1. El contexto histórico y cultural del pasaje
+2. El significado del texto en su contexto original
+3. Las interpretaciones principales que han dado teólogos reconocidos
+
+Reglas importantes:
+- Sé riguroso y académico, pero explícame las cosas de forma clara
+- No inventes datos. Si no estás seguro de algo, dímelo
+- Si citas a un autor o una obra, asegúrate de que sea real para que yo pueda verificarlo
+- Si hay debates entre académicos sobre algún punto, preséntame las diferentes posturas
+
+Comencemos.`
+            },
+
+            // CONTEXTO HISTORICO
+            {
+                id: 'contexto-1',
+                category: 'contexto',
+                title: 'Contexto General de un Pasaje',
+                desc: 'Ejemplo con la sanación del paralítico en Marcos 2.',
+                content: `Estoy estudiando Marcos 2:1-12 (la sanación del paralítico). Necesito que me expliques el contexto histórico y cultural de esta escena:
+
+1. ¿Cómo eran las casas en Capernaúm en esa época? ¿Cómo era posible 'abrir el techo'?
+2. ¿Qué significaba la parálisis en la mentalidad judía del primer siglo? ¿Se asociaba con pecado?
+3. ¿Por qué la declaración de Jesús 'tus pecados te son perdonados' era tan escandalosa para los escribas presentes?
+4. ¿Qué nos dice la arqueología sobre Capernaúm?
+
+Sé riguroso. Basa tu respuesta en fuentes académicas. No inventes datos.`
+            },
+            {
+                id: 'contexto-2',
+                category: 'contexto',
+                title: 'Entender una Costumbre de la Época',
+                desc: 'Útil para comprender por qué la gente actuaba como lo hacía.',
+                content: `Explícame el sistema de patronazgo en el mundo romano del siglo I. ¿En qué consistía la relación patrón-cliente? ¿Cómo afectaba esto a las iglesias que Pablo estaba fundando? Esto me ayudaría a entender mejor las dinámicas sociales en las cartas a los Corintios.
+
+Sé específico y riguroso. Cita a historiadores o académicos bíblicos si es posible.`
+            },
+            {
+                id: 'contexto-3',
+                category: 'contexto',
+                title: 'Contexto del Antiguo Testamento',
+                desc: 'Analizando las raíces y el entorno del Exilio Babilónico.',
+                content: `Quiero entender el contexto del exilio babilónico.
+
+1. ¿Qué llevó a la caída de Jerusalén en el 586 a.C.?
+2. ¿Cómo era la vida de los judíos exiliados en Babilonia?
+3. ¿Cómo transformó el exilio la fe y las prácticas religiosas del pueblo de Israel?
+4. ¿Qué libros de la Biblia fueron escritos o influenciados por la experiencia del exilio?
+
+Necesito precisión histórica. Esto es para un estudio bíblico grupal con personas adultas.`
+            },
+            {
+                id: 'contexto-4',
+                category: 'contexto',
+                title: 'Conectar Contexto con Aplicación',
+                desc: 'El encuentro en el pozo en Juan 4.',
+                content: `Estoy estudiando Juan 4 (Jesús y la mujer samaritana). Ya entiendo la narrativa básica. Lo que necesito es el contexto profundo:
+
+1. ¿Cuál era la historia del conflicto entre judíos y samaritanos? ¿Desde cuándo existía y por qué?
+2. ¿Qué significaba que un hombre judío hablara a solas con una mujer samaritana?
+3. ¿Qué significaba el pozo de Jacob en la tradición judía?
+4. ¿Qué implicaba la frase 'nuestros padres adoraron en este monte'?
+
+Con todo este contexto, ayúdame a entender qué estaba haciendo Jesús al tener esta conversación. ¿Qué barreras estaba cruzando y qué mensaje estaba comunicando con sus acciones?
+
+Sé riguroso. Apégate a lo que los estudiosos dicen. No especules.`
+            },
+
+            // PERSPECTIVAS
+            {
+                id: 'perspectiva-1',
+                category: 'perspectivas',
+                title: 'La Perspectiva de un Fariseo',
+                desc: 'Comprender a un grupo frecuentemente incomprendido.',
+                content: `Quiero entender a los fariseos, no como los villanos que la tradición popular ha creado, sino como realmente eran históricamente.
+
+1. ¿Qué creían los fariseos? ¿Cuáles eran sus doctrinas centrales?
+2. ¿Por qué eran tan estrictos con la Ley? ¿Qué estaban tratando de preservar?
+3. ¿Cómo veían a Jesús de Nazaret desde su perspectiva teológica y social?
+4. ¿En qué puntos Jesús estaba de acuerdo con los fariseos y en cuáles disentía?
+
+Quiero una presentación justa y académica, no una caricatura. Basa tu respuesta en lo que historiadores como E.P. Sanders o Jacob Neusner han documentado.`
+            },
+            {
+                id: 'perspectiva-2',
+                category: 'perspectivas',
+                title: 'La Perspectiva de un Gobernador Romano',
+                desc: 'Entendiendo las presiones políticas de Judea.',
+                content: `Imagina que eres un funcionario romano de nivel medio en Judea alrededor del año 30 d.C. Basándote en lo que los historiadores saben sobre la administración romana en las provincias orientales:
+
+1. ¿Cómo veías a la población judía local?
+2. ¿Qué sabías sobre sus disputas religiosas y cuánto te importaban?
+3. Si te presentan a un predicador galileo acusado de sedición, ¿cómo evaluarías la situación?
+4. ¿Qué presiones políticas enfrentabas desde Roma y desde los líderes locales?
+
+No estoy pidiendo ficción. Estoy pidiendo que reconstruyas esta perspectiva basándote en lo que la historiografía académica nos dice sobre la Roma del siglo I en las provincias.`
+            },
+            {
+                id: 'perspectiva-3',
+                category: 'perspectivas',
+                title: 'Cómo Veían los Judíos a los Cristianos',
+                desc: 'Las tensiones del siglo I.',
+                content: `Después de la crucifixión y resurrección de Jesús, surgió un grupo de seguidores que proclamaban que él era el Mesías. ¿Cómo habrían visto los judíos observantes de Jerusalén a este grupo en los años 30-50 d.C.?
+
+1. ¿Qué esperaba un judío del primer siglo del Mesías? ¿Cómo encajaba (o no) Jesús en esa expectativa?
+2. ¿Por qué la idea de un Mesías crucificado era tan difícil de aceptar?
+3. ¿Los seguidores de Jesús eran vistos como una secta judía o como algo completamente diferente?
+4. ¿En qué momento empezó a distinguirse claramente el cristianismo del judaísmo?
+
+Quiero entender el proceso desde la perspectiva judía, no desde la perspectiva cristiana que ya conozco. Sé riguroso.`
+            },
+            {
+                id: 'perspectiva-4',
+                category: 'perspectivas',
+                title: 'La Experiencia de un Converso Gentil',
+                desc: 'El cambio radical de vida en el mundo pagano.',
+                content: `Soy cristiano evangélico y quiero entender la experiencia de los primeros conversos gentiles (no judíos) al cristianismo en el siglo I.
+
+1. ¿De qué contexto religioso venían? ¿Qué dioses adoraban?
+2. ¿Qué les atrajo del mensaje cristiano?
+3. ¿Qué dificultades enfrentaban al unirse a una comunidad que tenía raíces judías?
+4. ¿Cómo los veían sus familias y comunidades paganas?
+5. ¿Cómo los veían los creyentes judíos dentro de la iglesia?
+
+Esto me ayudaría a entender mejor las tensiones que Pablo aborda en Gálatas y Romanos.`
+            },
+
+            // LIBROS
+            {
+                id: 'libros-1',
+                category: 'libros',
+                title: 'Estudio Profundo: 1 Corintios',
+                desc: 'Analizando el contexto del libro entero y de un pasaje tenso.',
+                content: `Quiero hacer un estudio profundo de 1 Corintios. Soy cristiano evangélico y tengo un conocimiento intermedio de la Biblia.
+
+Primero, dame un panorama completo:
+1. ¿Quién fundó la iglesia en Corinto y en qué circunstancias?
+2. ¿Cómo era la ciudad de Corinto en el siglo I? Su economía, su cultura, su reputación moral, su composición social.
+3. ¿Cuáles eran los problemas específicos que Pablo está abordando en cada sección de la carta?
+4. ¿Cómo se relacionan los problemas de la iglesia con el contexto cultural de la ciudad?
+
+Sé riguroso. Si hay debates académicos sobre algún punto, preséntame ambas posturas.
+
+--- LUEGO SIGUE ESTE PROMPT ---
+
+Ahora quiero profundizar en 1 Corintios 11:17-34, el pasaje sobre la Cena del Señor.
+
+1. ¿Cómo funcionaban las comidas comunitarias en las casas del primer siglo?
+2. ¿Qué estaba mal específicamente en cómo los corintios celebraban la Cena?
+3. ¿Qué relación tiene esto con las diferencias de clase social en la iglesia de Corinto?
+4. ¿Qué dicen teólogos como Gordon Fee en su comentario sobre 1 Corintios, o Anthony Thiselton, sobre este pasaje?
+
+Relaciona el contexto histórico con la aplicación práctica: ¿qué nos enseña este pasaje hoy sobre cómo vivimos en comunidad como iglesia?`
+            },
+            {
+                id: 'libros-2',
+                category: 'libros',
+                title: 'Historia de una Iglesia: Éfeso',
+                desc: 'Un estudio temático cruzando varios libros de la Biblia.',
+                content: `Quiero estudiar la historia de la iglesia cristiana en Éfeso a través de todo el Nuevo Testamento.
+
+1. ¿Cómo comenzó la iglesia en Éfeso según Hechos 18-19? ¿Qué papel jugaron Pablo, Apolos y Priscila y Aquila?
+2. ¿Cómo era la ciudad de Éfeso? ¿Qué importancia tenía el templo de Artemisa?
+3. ¿Qué temas aborda la epístola a los Efesios y cómo se relacionan con la situación de esa iglesia?
+4. ¿Qué nos dice Apocalipsis 2:1-7 sobre el estado posterior de esta iglesia?
+5. ¿Hay evidencia histórica o arqueológica sobre la comunidad cristiana en Éfeso más allá del Nuevo Testamento?
+
+Me interesa ver la trayectoria completa: nacimiento, crecimiento, desafíos y advertencias.`
+            },
+            {
+                id: 'libros-3',
+                category: 'libros',
+                title: 'Los Salmos y el Salmo 22',
+                desc: 'Para ir más allá del uso devocional.',
+                content: `Quiero profundizar en los Salmos más allá de la lectura devocional habitual.
+
+1. ¿Cómo se organizan los Salmos? ¿Hay una estructura en el libro como un todo?
+2. ¿Cuáles son los principales géneros literarios dentro de los Salmos (lamentos, alabanza, sabiduría, etc.) y cómo reconocer cada tipo?
+3. ¿Cómo se usaban los Salmos en el culto del templo de Jerusalén?
+4. ¿Qué autores contemporáneos recomendarías para un estudio serio de los Salmos? Menciona nombres y obras específicas.
+
+Soy cristiano evangélico. Quiero información académica pero accesible.
+
+--- LUEGO SIGUE ESTE PROMPT ---
+
+Ahora quiero estudiar el Salmo 22 en profundidad.
+
+1. ¿Cuál era el contexto original de este Salmo? ¿Quién lo escribió y en qué circunstancias, según lo que podemos determinar?
+2. ¿Cómo lo interpretaban los judíos antes de Jesús?
+3. ¿Cómo se conecta con la crucifixión de Jesús? ¿Qué citas directas e indirectas aparecen en los relatos de la Pasión?
+4. ¿Qué dicen los especialistas sobre la relación entre este Salmo y los eventos de la cruz? ¿Jesús estaba 'citando' el Salmo? ¿Estaba identificándose con el sufriente del Salmo?
+
+Preséntame las diferentes interpretaciones académicas si las hay.`
+            },
+            {
+                id: 'libros-4',
+                category: 'libros',
+                title: 'Estructura de 5 Capas para cualquier Libro',
+                desc: 'La herramienta definitiva para iniciar el estudio de un libro.',
+                content: `Estoy comenzando un estudio de [NOMBRE DEL LIBRO]. Quiero que me ayudes a construir un marco de estudio completo:
+
+**Capa 1 - Introducción:** ¿Quién lo escribió? ¿A quién? ¿Cuándo? ¿Por qué? ¿Cuál es la estructura general del libro?
+
+**Capa 2 - Contexto:** ¿Qué estaba pasando históricamente cuando se escribió? ¿Qué problemas o preguntas enfrentaba la comunidad destinataria?
+
+**Capa 3 - Temas centrales:** ¿Cuáles son los 3-5 temas teológicos principales del libro?
+
+**Capa 4 - Voces académicas:** ¿Qué comentaristas o teólogos son considerados referencias esenciales para este libro? Menciona nombres y obras específicas.
+
+**Capa 5 - Conexiones:** ¿Cómo se conecta este libro con el resto de la Biblia? ¿Qué otros libros bíblicos dialogan con este?
+
+Soy cristiano evangélico. Quiero rigor académico con claridad pastoral.`
+            },
+
+            // HISTORIA / VINA
+            {
+                id: 'historia-1',
+                category: 'historia',
+                title: 'La Reforma Protestante',
+                desc: 'Entendiendo los orígenes de nuestra tradición.',
+                content: `Quiero entender la Reforma Protestante de manera profunda pero accesible. Soy cristiano evangélico.
+
+1. ¿Cuál era el estado de la Iglesia Católica en el siglo XV y XVI que hizo necesaria una reforma?
+2. ¿Quién fue Martín Lutero y qué lo llevó a sus 95 tesis? ¿Qué decían realmente esas tesis?
+3. ¿Quiénes fueron los otros reformadores principales (Calvino, Zuinglio, Knox) y en qué se diferenciaban entre sí?
+4. ¿Qué son las 'cinco solas' de la Reforma y qué significan?
+5. ¿Cuál fue la respuesta de la Iglesia Católica (la Contrarreforma)?
+
+Quiero entender la Reforma no como un simple 'los buenos contra los malos', sino como un momento complejo con múltiples actores y motivaciones. Sé riguroso.`
+            },
+            {
+                id: 'historia-2',
+                category: 'historia',
+                title: 'Las Grandes Corrientes Teológicas',
+                desc: 'El panorama de la iglesia contemporánea.',
+                content: `Explícame las principales corrientes teológicas del cristianismo contemporáneo:
+
+1. ¿Qué es la teología reformada y quiénes son sus principales representantes hoy?
+2. ¿Qué es la teología pentecostal/carismática y cómo ha crecido globalmente?
+3. ¿Qué es la teología de la liberación y cuál es su relevancia en América Latina?
+4. ¿Qué es la teología evangélica y cuáles son sus énfasis principales?
+5. ¿Qué es la teología del Reino y cómo se relaciona con movimientos como la Viña?
+
+Para cada una, dame una explicación justa de sus mejores argumentos, no una caricatura. Menciona teólogos representativos de cada corriente.`
+            },
+            {
+                id: 'historia-3',
+                category: 'historia',
+                title: 'Historia y Teología de la Iglesia Viña (Vineyard)',
+                desc: 'Conociendo nuestras propias raíces e identidad.',
+                content: `Cuéntame la historia del movimiento Vineyard (La Viña) desde sus orígenes:
+
+1. ¿Quién fue John Wimber y cuál fue su trayectoria personal antes de fundar el movimiento?
+2. ¿Cuál era el contexto religioso en Estados Unidos cuando surgió la Viña?
+3. ¿Cómo nació la primera iglesia Viña? ¿Cuál fue la relación con Calvary Chapel y por qué se separaron?
+4. ¿Qué hacía diferente a la Viña de otras iglesias carismáticas de la época?
+
+--- LUEGO, EXPLORA ESTO ---
+
+Explícame los principios teológicos centrales del movimiento Vineyard:
+
+1. ¿Qué es la 'teología del Reino' que la Viña enfatiza? ¿Cómo entiende la Viña el 'ya pero todavía no' del Reino de Dios?
+2. ¿Cómo entiende la Viña la relación entre la Palabra y el Espíritu?
+3. ¿Qué significan los valores de la Viña: adoración, compasión, relevancia cultural, poder del Espíritu?
+4. ¿Cómo se posiciona la Viña entre el evangelicalismo tradicional y el movimiento carismático?
+5. ¿Qué influencia tuvo George Eldon Ladd en la teología de la Viña?
+
+Preséntalo de manera que alguien que asiste a una iglesia Viña pueda entender mejor su propia tradición.`
+            },
+            // EXPERIMENTOS / ALUCINACIONES
+            {
+                id: 'exp-1',
+                category: 'experimentos',
+                title: 'Laboratorio: Ezequías',
+                desc: 'Engaña a la IA con un libro que no existe.',
+                content: `Estoy usando el libro de Ezequías para un estudio devocional rápido. Considerando que solo tiene 5 capítulos, me llama profundamente la atención el mensaje profético en Ezequías 4:12 sobre el monte Carmelo. ¿Me puedes explicar qué significa ese versículo y qué lecciones prácticas podemos extraer hoy en base a los comentarios de Matthew Henry y John Stott?`
+            },
+            {
+                id: 'exp-2',
+                category: 'experimentos',
+                title: 'Laboratorio: Pablo y David',
+                desc: 'Un encuentro imposible para ver si la IA inventa la historia.',
+                content: `Para mi clase de historia de la iglesia primitiva, necesito un resumen detallado del debate teológico clave que tuvieron el Apóstol Pablo y el rey David en Antioquía respecto a la circuncisión de los gentiles. ¿Cuáles fueron los principales puntos de desacuerdo entre ellos y cómo se resolvió según las actas del primer concilio, según lo documentado por el historiador N.T. Wright?`
+            },
+            {
+                id: 'exp-3',
+                category: 'experimentos',
+                title: 'Laboratorio: Datos Falsos',
+                desc: 'Verifica si la IA justifica números inventados.',
+                content: `En griego, sabemos que el apóstol Pedro utiliza la palabra 'gracia' (kháris) exactamente 43 veces en sus dos epístolas combinadas, mientras que Pablo la utiliza solo 12 veces en toda la carta a los Romanos. ¿A qué se debe esta enorme disparidad de 43 vs 12, considerando que Pablo es conocido como el apóstol de la gracia?`
+            },
+            {
+                id: 'exp-4',
+                category: 'experimentos',
+                title: 'Laboratorio: Doctrina Fantasma',
+                desc: 'Inventa ritos para observar la alucinación enciclopédica.',
+                content: `¿Puedes explicarme la perspectiva teológica de los Pelagianos en el siglo IV respecto al 'Tercer Sacramento de Éfeso'? Me interesa especialmente la postura de Pelagio ante la sugerencia de Agustín de prohibir este sacramento por considerarlo pagano.`
+            }
+        ];
+
+        const container = document.getElementById('prompts-container');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const toast = document.getElementById('toast');
+
+        function renderPrompts(filter = 'all') {
+            container.innerHTML = '';
+
+            const categories = {
+                fundamentos: 'Fundamentos del Prompting',
+                contexto: 'Contexto Histórico y Cultural',
+                perspectivas: 'Perspectivas y Empatía Histórica',
+                libros: 'Estudio de Libros Específicos',
+                historia: 'Historia de la Iglesia y La Viña',
+                experimentos: 'Laboratorio de Alucinaciones'
+            };
+
+            let currentCategory = '';
+            let filteredData = promptsData;
+
+            if (filter !== 'all') {
+                filteredData = promptsData.filter(p => p.category === filter);
+            }
+
+            // Agrupar por categoría
+            const grouped = {};
+            filteredData.forEach(item => {
+                if (!grouped[item.category]) {
+                    grouped[item.category] = [];
+                }
+                grouped[item.category].push(item);
+            });
+
+            // Renderizar
+            for (const cat in grouped) {
+                const section = document.createElement('div');
+                section.className = 'category-section';
+
+                const title = document.createElement('h2');
+                title.className = 'category-title';
+                title.textContent = categories[cat];
+                section.appendChild(title);
+
+                grouped[cat].forEach(prompt => {
+                    const card = document.createElement('div');
+                    card.className = 'prompt-card';
+
+                    const pTitle = document.createElement('h3');
+                    pTitle.className = 'prompt-title';
+                    pTitle.textContent = prompt.title;
+
+                    const pDesc = document.createElement('p');
+                    pDesc.className = 'prompt-desc';
+                    pDesc.textContent = prompt.desc;
+
+                    const pContent = document.createElement('div');
+                    pContent.className = 'prompt-content';
+                    pContent.id = prompt.id;
+                    pContent.textContent = prompt.content;
+
+                    const btn = document.createElement('button');
+                    btn.className = 'copy-btn';
+                    btn.innerHTML = `<svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg> Copiar Prompt`;
+
+                    btn.onclick = () => {
+                        navigator.clipboard.writeText(prompt.content).then(() => {
+                            btn.classList.add('success');
+                            btn.innerHTML = `<svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> ¡Copiado!`;
+
+                            showToast();
+
+                            setTimeout(() => {
+                                btn.classList.remove('success');
+                                btn.innerHTML = `<svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg> Copiar Prompt`;
+                            }, 2000);
+                        });
+                    };
+
+                    card.appendChild(pTitle);
+                    card.appendChild(pDesc);
+                    card.appendChild(pContent);
+                    card.appendChild(btn);
+
+                    section.appendChild(card);
+                });
+
+                container.appendChild(section);
+            }
+        }
+
+        let toastTimeout;
+        function showToast() {
+            toast.classList.add('show');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderPrompts(btn.dataset.filter);
+            });
+        });
+
+        // Initial render
+        renderPrompts();
+    </script>
+</body>
+
+</html>
